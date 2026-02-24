@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nornir-detect"
+version = "0.1.0"
+description = "Nornir plugin for automatic network device detection using device-detect module"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {text = "MIT"}
+authors = [
+    {name = "Mohamed RABAH", email = "mdrbh0@gmail.com"}
+]
+keywords = ["nornir", "network", "automation", "detection", "device-detect"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Networking",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+dependencies = [
+    "nornir>=3.0.0",
+    "device-detect>=0.7.0",
+]
+
+[project.optional-dependencies]
+netmiko = ["nornir-netmiko"]
+scrapli = ["nornir-scrapli"]
+napalm = ["nornir-napalm"]
+salt = ["nornir-salt"]
+ansible = ["nornir-ansible"]
+utils = ["nornir-utils"]
+full = [
+    "nornir-netmiko",
+    "nornir-scrapli",
+    "nornir-napalm",
+    "nornir-salt",
+    "nornir-ansible",
+    "nornir-utils",
+]
+
+[project.urls]
+Homepage = "https://github.com/mdrbh0/nornir-detect"
+Repository = "https://github.com/mdrbh0/nornir-detect"
