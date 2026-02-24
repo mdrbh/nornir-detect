@@ -2,13 +2,13 @@ from setuptools import setup, find_packages
 
 setup(
     name="nornir-detect",
-    version="0.1.0",
+    version="0.1.1",
     description="Nornir plugin for automatic network device detection using device-detect module",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     author="Mohamed RABAH",
     author_email="mdrbh0@gmail.com",
-    url="https://github.com/mdrbh0/nornir-detect",
+    url="https://github.com/mdrbh/nornir-detect",
     packages=find_packages(),
     install_requires=[
         "nornir>=3.0.0",

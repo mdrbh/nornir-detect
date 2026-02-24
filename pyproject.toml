@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nornir-detect"
-version = "0.1.0"
+version = "0.1.1"
 description = "Nornir plugin for automatic network device detection using device-detect module"
 readme = "README.md"
 requires-python = ">=3.7"
@@ -52,5 +52,5 @@ full = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/mdrbh0/nornir-detect"
-Repository = "https://github.com/mdrbh0/nornir-detect"
+Homepage = "https://github.com/mdrbh/nornir-detect"
+Repository = "https://github.com/mdrbh/nornir-detect"
