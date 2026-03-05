@@ -19,7 +19,7 @@ from nornir_detect.helpers import (
     set_connection_options
 )
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 __all__ = [
     "detect",
     "collect",

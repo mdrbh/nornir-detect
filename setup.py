@@ -2,9 +2,9 @@ from setuptools import setup, find_packages
 
 setup(
     name="nornir-detect",
-    version="0.1.1",
+    version="0.1.2",
     description="Nornir plugin for automatic network device detection using device-detect module",
-    long_description=open("README.md").read(),
+    long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     author="Mohamed RABAH",
     author_email="mdrbh0@gmail.com",
