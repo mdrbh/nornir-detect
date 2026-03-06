@@ -23,7 +23,8 @@ def detect(
     ssh_verification: bool = False,
     ssh_version_filter: bool = True,
     ssh_version_fallback: bool = True,
-    ssh_timing_profile: str = "normal",
+    ssh_timing_profile: str = "fast",
+    include_banners: Optional[bool] = None,
     update_platform: bool = True,
     log_level: str = "INFO"
 ) -> Result:
@@ -40,7 +41,8 @@ def detect(
         ssh_verification: Verify SNMP results via SSH (default: False)
         ssh_version_filter: Enable SSH version filtering (default: True)
         ssh_version_fallback: Test non-matching device types if no match (default: True)
-        ssh_timing_profile: SSH timing profile - 'fast', 'normal', or 'slow' (default: 'normal')
+        ssh_timing_profile: SSH timing profile - 'fast', 'normal', or 'slow' (default: 'fast')
+        include_banners: Include SSH banner data in results (default: None, auto-detect)
         update_platform: Update host platform and connection options (default: True)
         log_level: Logging level for device-detect module (default: 'INFO')
     
@@ -51,6 +53,8 @@ def detect(
             - method: Detection method used ('SNMP', 'SSH', 'SNMP+SSH')
             - Framework driver mappings (netmiko, scrapli, napalm, etc.)
             - Timing information
+            - warnings: List of non-critical warnings (if any)
+            - all_errors: Complete error history from detection attempts
     
     Example:
         >>> from nornir import InitNornir
@@ -105,6 +109,7 @@ def detect(
             # Detection options
             enable_snmp=enable_snmp,
             ssh_verification=ssh_verification,
+            include_banners=include_banners,
             log_level=log_level,
         )
         
@@ -113,19 +118,50 @@ def detect(
         
         # Check if detection was successful
         if not detection_result.success or not detection_result.device_type:
-            error_msg = f"Device detection failed for {task.host.name}"
-            logger.error(error_msg)
+            # Build comprehensive error message for root cause analysis
+            error_parts = [f"Device detection failed for {task.host.name}"]
+            
+            # Add primary error
+            if detection_result.error:
+                error_parts.append(f"Primary Error: {detection_result.error}")
+                if detection_result.error_type:
+                    error_parts.append(f"Error Type: {detection_result.error_type}")
+            
+            # Add all errors for complete diagnostics
+            if detection_result.all_errors:
+                error_parts.append("\nDetailed Error History:")
+                for idx, err in enumerate(detection_result.all_errors, 1):
+                    method = err.get('method', 'unknown')
+                    error_msg = err.get('error', 'No error message')
+                    error_type = err.get('error_type', 'unknown')
+                    error_parts.append(f"  {idx}. [{method.upper()}] {error_type}: {error_msg}")
+            
+            # Add warnings if any
+            if detection_result.warnings:
+                error_parts.append("\nWarnings:")
+                for warning in detection_result.warnings:
+                    error_parts.append(f"  - {warning}")
+            
+            comprehensive_error = "\n".join(error_parts)
+            logger.error(comprehensive_error)
+            
             return Result(
                 host=task.host,
                 result=detection_result,
                 failed=True,
-                exception=Exception(error_msg)
+                exception=Exception(comprehensive_error)
             )
         
         logger.info(
             f"Host {task.host.name}: detected {detection_result.device_type} "
             f"(score: {detection_result.score}, method: {detection_result.method})"
         )
+        
+        # Log warnings if any (even for successful detections)
+        if detection_result.warnings:
+            logger.warning(f"Host {task.host.name}: Detection succeeded with warnings:")
+            for warning in detection_result.warnings:
+                logger.warning(f"  - {warning}")
         
         # Update platform and connection options if requested
         if update_platform:
@@ -271,19 +307,50 @@ def collect(
         
         # Check if collection was successful
         if not collection_result.success:
-            error_msg = f"Data collection failed for {task.host.name}"
-            logger.error(error_msg)
+            # Build comprehensive error message for root cause analysis
+            error_parts = [f"Data collection failed for {task.host.name}"]
+            
+            # Add primary error
+            if collection_result.error:
+                error_parts.append(f"Primary Error: {collection_result.error}")
+                if collection_result.error_type:
+                    error_parts.append(f"Error Type: {collection_result.error_type}")
+            
+            # Add all errors for complete diagnostics
+            if collection_result.all_errors:
+                error_parts.append("\nDetailed Error History:")
+                for idx, err in enumerate(collection_result.all_errors, 1):
+                    method = err.get('method', 'unknown')
+                    error_msg = err.get('error', 'No error message')
+                    error_type = err.get('error_type', 'unknown')
+                    error_parts.append(f"  {idx}. [{method.upper()}] {error_type}: {error_msg}")
+            
+            # Add warnings if any
+            if collection_result.warnings:
+                error_parts.append("\nWarnings:")
+                for warning in collection_result.warnings:
+                    error_parts.append(f"  - {warning}")
+            
+            comprehensive_error = "\n".join(error_parts)
+            logger.error(comprehensive_error)
+            
             return Result(
                 host=task.host,
                 result=collection_result,
                 failed=True,
-                exception=Exception(error_msg)
+                exception=Exception(comprehensive_error)
             )
         
         logger.info(
             f"Host {task.host.name}: data collected "
             f"(method: {collection_result.method})"
         )
+        
+        # Log warnings if any (even for successful collections)
+        if collection_result.warnings:
+            logger.warning(f"Host {task.host.name}: Collection succeeded with warnings:")
+            for warning in collection_result.warnings:
+                logger.warning(f"  - {warning}")
         
         # Save to file if requested
         if save_to_file:

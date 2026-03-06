@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="nornir-detect",
-    version="0.1.2",
+    version="0.2.0",
     description="Nornir plugin for automatic network device detection using device-detect module",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
@@ -12,7 +12,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "nornir>=3.0.0",
-        "device-detect>=0.7.0",
+        "device-detect>=0.10.0",
     ],
     extras_require={
         "netmiko": ["nornir-netmiko"],

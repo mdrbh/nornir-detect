@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nornir-detect"
-version = "0.1.2"
+version = "0.2.0"
 description = "Nornir plugin for automatic network device detection using device-detect module"
 readme = "README.md"
 requires-python = ">=3.7"
@@ -32,7 +32,7 @@ classifiers = [
 
 dependencies = [
     "nornir>=3.0.0",
-    "device-detect>=0.7.0",
+    "device-detect>=0.10.0",
 ]
 
 [project.optional-dependencies]
