@@ -53,8 +53,9 @@ def detect(
             - method: Detection method used ('SNMP', 'SSH', 'SNMP+SSH')
             - Framework driver mappings (netmiko, scrapli, napalm, etc.)
             - Timing information
-            - warnings: List of non-critical warnings (if any)
-            - all_errors: Complete error history from detection attempts
+            - error_records: List of ErrorRecord objects with detailed error/warning context (v0.11.0+)
+            - has_errors/has_warnings: Boolean properties for error/warning detection (v0.11.0+)
+            - primary_error: Highest priority error for troubleshooting (v0.11.0+)
     
     Example:
         >>> from nornir import InitNornir
@@ -121,26 +122,30 @@ def detect(
             # Build comprehensive error message for root cause analysis
             error_parts = [f"Device detection failed for {task.host.name}"]
             
-            # Add primary error
-            if detection_result.error:
-                error_parts.append(f"Primary Error: {detection_result.error}")
-                if detection_result.error_type:
-                    error_parts.append(f"Error Type: {detection_result.error_type}")
+            # Add primary error (v0.11.0: using ErrorRecord)
+            if detection_result.primary_error:
+                primary = detection_result.primary_error
+                error_parts.append(f"Primary Error: {primary.message}")
+                error_parts.append(f"Error Type: {primary.error_type}")
+                if primary.phase:
+                    error_parts.append(f"Phase: {primary.phase}")
             
-            # Add all errors for complete diagnostics
-            if detection_result.all_errors:
+            # Add all errors for complete diagnostics (v0.11.0: using ErrorRecord list)
+            if detection_result.has_errors:
                 error_parts.append("\nDetailed Error History:")
-                for idx, err in enumerate(detection_result.all_errors, 1):
-                    method = err.get('method', 'unknown')
-                    error_msg = err.get('error', 'No error message')
-                    error_type = err.get('error_type', 'unknown')
-                    error_parts.append(f"  {idx}. [{method.upper()}] {error_type}: {error_msg}")
+                for idx, err_record in enumerate(detection_result.errors, 1):
+                    method = err_record.method.upper() if err_record.method else 'UNKNOWN'
+                    error_parts.append(
+                        f"  {idx}. [{method}] {err_record.error_type}: {err_record.message}"
+                    )
+                    if err_record.context:
+                        error_parts.append(f"      Context: {err_record.context}")
             
-            # Add warnings if any
-            if detection_result.warnings:
+            # Add warnings if any (v0.11.0: using ErrorRecord list)
+            if detection_result.has_warnings:
                 error_parts.append("\nWarnings:")
-                for warning in detection_result.warnings:
-                    error_parts.append(f"  - {warning}")
+                for warn_record in detection_result.warnings:
+                    error_parts.append(f"  - {warn_record.message}")
             
             comprehensive_error = "\n".join(error_parts)
             logger.error(comprehensive_error)
@@ -157,11 +162,11 @@ def detect(
             f"(score: {detection_result.score}, method: {detection_result.method})"
         )
         
-        # Log warnings if any (even for successful detections)
-        if detection_result.warnings:
+        # Log warnings if any (even for successful detections) (v0.11.0: using ErrorRecord list)
+        if detection_result.has_warnings:
             logger.warning(f"Host {task.host.name}: Detection succeeded with warnings:")
-            for warning in detection_result.warnings:
-                logger.warning(f"  - {warning}")
+            for warn_record in detection_result.warnings:
+                logger.warning(f"  - {warn_record.message}")
         
         # Update platform and connection options if requested
         if update_platform:
@@ -310,26 +315,30 @@ def collect(
             # Build comprehensive error message for root cause analysis
             error_parts = [f"Data collection failed for {task.host.name}"]
             
-            # Add primary error
-            if collection_result.error:
-                error_parts.append(f"Primary Error: {collection_result.error}")
-                if collection_result.error_type:
-                    error_parts.append(f"Error Type: {collection_result.error_type}")
+            # Add primary error (v0.11.0: using ErrorRecord)
+            if collection_result.primary_error:
+                primary = collection_result.primary_error
+                error_parts.append(f"Primary Error: {primary.message}")
+                error_parts.append(f"Error Type: {primary.error_type}")
+                if primary.phase:
+                    error_parts.append(f"Phase: {primary.phase}")
             
-            # Add all errors for complete diagnostics
-            if collection_result.all_errors:
+            # Add all errors for complete diagnostics (v0.11.0: using ErrorRecord list)
+            if collection_result.has_errors:
                 error_parts.append("\nDetailed Error History:")
-                for idx, err in enumerate(collection_result.all_errors, 1):
-                    method = err.get('method', 'unknown')
-                    error_msg = err.get('error', 'No error message')
-                    error_type = err.get('error_type', 'unknown')
-                    error_parts.append(f"  {idx}. [{method.upper()}] {error_type}: {error_msg}")
+                for idx, err_record in enumerate(collection_result.errors, 1):
+                    method = err_record.method.upper() if err_record.method else 'UNKNOWN'
+                    error_parts.append(
+                        f"  {idx}. [{method}] {err_record.error_type}: {err_record.message}"
+                    )
+                    if err_record.context:
+                        error_parts.append(f"      Context: {err_record.context}")
             
-            # Add warnings if any
-            if collection_result.warnings:
+            # Add warnings if any (v0.11.0: using ErrorRecord list)
+            if collection_result.has_warnings:
                 error_parts.append("\nWarnings:")
-                for warning in collection_result.warnings:
-                    error_parts.append(f"  - {warning}")
+                for warn_record in collection_result.warnings:
+                    error_parts.append(f"  - {warn_record.message}")
             
             comprehensive_error = "\n".join(error_parts)
             logger.error(comprehensive_error)
@@ -346,11 +355,11 @@ def collect(
             f"(method: {collection_result.method})"
         )
         
-        # Log warnings if any (even for successful collections)
-        if collection_result.warnings:
+        # Log warnings if any (even for successful collections) (v0.11.0: using ErrorRecord list)
+        if collection_result.has_warnings:
             logger.warning(f"Host {task.host.name}: Collection succeeded with warnings:")
-            for warning in collection_result.warnings:
-                logger.warning(f"  - {warning}")
+            for warn_record in collection_result.warnings:
+                logger.warning(f"  - {warn_record.message}")
         
         # Save to file if requested
         if save_to_file:
